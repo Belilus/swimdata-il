@@ -1,0 +1,12 @@
+Copyright (c) 2026 Asaf Belilus. All rights reserved.
+
+This repository is shared for academic evaluation of the Data Management final
+project (Ben-Gurion University, Spring 2026). It may be viewed and run by the
+course staff for the purpose of grading and review.
+
+No permission is granted to copy, modify, redistribute, or use this software or
+its design for any other purpose without the author's prior written consent.
+
+The competition data in `samples/` originates from publicly published Israeli
+Swimming Association / loglig.com competition documents and consists of factual
+results. It is included solely to make this academic project reproducible.

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SwimData-IL — ISA Results Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:oklch(0.16 0.025 240); --ink-2:oklch(0.21 0.03 240); --ink-3:oklch(0.26 0.032 240);
+  --line:oklch(0.32 0.03 240); --cyan:oklch(0.85 0.13 190); --blue:oklch(0.64 0.16 235);
+  --green:oklch(0.74 0.17 160); --text:oklch(0.96 0.01 240); --muted:oklch(0.72 0.02 245);
+  --gold:oklch(0.82 0.15 90); --silver:oklch(0.80 0.02 240); --bronze:oklch(0.68 0.11 55);
+  --sans:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(1200px 600px at 80% -10%, oklch(0.30 0.09 235/.5), transparent 60%),
+  radial-gradient(900px 500px at 0% 0%, oklch(0.28 0.07 190/.35), transparent 55%), var(--ink);
+  color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--cyan);text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header.top{padding:26px 0 8px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:grid;place-items:center;font-size:24px;box-shadow:0 6px 24px oklch(0.64 0.16 235/.4)}
+.brand h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+.brand .tag{color:var(--muted);font-size:13px;margin-top:2px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;background:oklch(0.85 0.13 190/.12);
+  color:var(--cyan);font-size:11px;font-weight:600;border:1px solid oklch(0.85 0.13 190/.25)}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:22px 0 6px}
+.kpi{background:linear-gradient(180deg,var(--ink-2),oklch(0.19 0.03 240));border:1px solid var(--line);
+  border-radius:14px;padding:14px 16px}
+.kpi .n{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--cyan)}
+.kpi .l{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+/* tabs */
+nav.tabs{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+nav.tabs button{background:none;border:0;color:var(--muted);font-family:var(--sans);font-size:14px;
+  font-weight:600;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav.tabs button:hover{color:var(--text)}
+nav.tabs button.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+section{display:none;animation:fade .35s ease}
+section.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:18px}
+.card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+/* controls */
+select,input{background:var(--ink-3);color:var(--text);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-family:var(--sans);font-size:14px}
+input{width:100%}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+/* table */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
+  letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid oklch(0.28 0.03 240/.6)}
+tr:hover td{background:oklch(0.24 0.03 240/.5)}
+.rtl{direction:rtl;unicode-bidi:plaintext}
+.sub-name{color:var(--muted);font-size:12px}
+.medal{display:inline-block;min-width:22px;text-align:center;font-weight:700;font-family:var(--mono)}
+.g{color:var(--gold)}.s{color:var(--silver)}.b{color:var(--bronze)}
+.badge{font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:6px;background:var(--ink-3);
+  border:1px solid var(--line);color:var(--muted)}
+.time{font-family:var(--mono);color:var(--cyan);font-weight:600}
+.fina{font-family:var(--mono);color:var(--green)}
+/* podium cards */
+.event-card{background:var(--ink-3);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.event-card h3{margin:0 0 10px;font-size:14.5px;font-weight:600}
+.podium-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid oklch(0.30 0.03 240/.5)}
+.podium-row:last-child{border-bottom:0}
+.rank-medal{font-size:16px;width:22px;text-align:center}
+.pname{flex:1;min-width:0}
+.pname b{font-weight:600}
+.pclub{color:var(--muted);font-size:12px}
+/* entity resolution */
+.resolve{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.spell{background:oklch(0.30 0.06 30/.4);border:1px solid oklch(0.55 0.12 30/.4);color:oklch(0.86 0.06 40);
+  padding:3px 9px;border-radius:8px;font-size:12.5px}
+.arrow{color:var(--cyan);font-size:18px}
+.canon{background:oklch(0.30 0.09 190/.35);border:1px solid oklch(0.6 0.12 190/.5);color:var(--cyan);
+  padding:4px 11px;border-radius:8px;font-weight:600;font-size:13px}
+.callout{background:linear-gradient(180deg,oklch(0.28 0.06 235/.5),var(--ink-2));border:1px solid var(--line);
+  border-left:3px solid var(--cyan);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:14px}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+.dossier{position:fixed;inset:0;background:oklch(0.10 0.02 240/.7);display:none;place-items:center;z-index:20;backdrop-filter:blur(3px)}
+.dossier.on{display:grid}
+.dossier .inner{background:var(--ink-2);border:1px solid var(--line);border-radius:18px;max-width:640px;
+  width:92%;max-height:84vh;overflow:auto;padding:24px}
+.x{float:right;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+footer{color:var(--muted);font-size:12.5px;padding:26px 0 40px;text-align:center;border-top:1px solid var(--line);margin-top:20px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🌊</div>
+      <div>
+        <h1>SwimData-IL <span class="pill">Data-Management Project</span></h1>
+        <div class="tag">Israeli Swimming Association results → normalised relational database · BGU 2026</div>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-t="overview" class="on">Overview</button>
+    <button data-t="medals">Medal Table</button>
+    <button data-t="events">Events &amp; Podiums</button>
+    <button data-t="swimmers">Swimmers</button>
+    <button data-t="records">Records</button>
+    <button data-t="challenge">Data Challenge</button>
+  </nav>
+
+  <section id="overview" class="on"></section>
+  <section id="medals"></section>
+  <section id="events"></section>
+  <section id="swimmers"></section>
+  <section id="records"></section>
+  <section id="challenge"></section>
+
+  <footer>
+    Built from public ISA / loglig.com PDF exports · geometry-based parser →
+    BCNF schema (PostgreSQL / DuckDB) · self-contained demo, no backend.
+  </footer>
+</div>
+
+<div class="dossier" id="dossier"><div class="inner" id="dossierInner"></div></div>
+
+<script src="data.js"></script>
+<script>
+const D = window.SWIM_DATA;
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
+const compName = id => (D.competitions.find(c=>c.id===id)||{}).name_en||('Meet '+id);
+const compShort = id => id===1 ? 'Youth · Summer 2026' : 'Youth+Seniors · Winter 2025';
+
+// bilingual name: prefer English, fall back to Hebrew
+function nm(o){const en=[o.fe,o.le].filter(Boolean).join(' ');const he=[o.fh,o.lh].filter(Boolean).join(' ');
+  return en?{main:en,sub:he,rtl:false}:{main:he||'—',sub:'',rtl:true};}
+function nameCell(o){const n=nm(o);return `<div class="pname"><b class="${n.rtl?'rtl':''}">${n.main}</b>`+
+  (n.sub?`<div class="sub-name rtl">${n.sub}</div>`:'')+`</div>`;}
+const gsym = g => g==='Girls'?'♀':g==='Boys'?'♂':'⚥';
+const medal = i => ['🥇','🥈','🥉'][i-1]||i;
+
+/* ---------- KPIs ---------- */
+const m=D.meta;
+$('#kpis').innerHTML=[['Competitions',m.competitions],['Swims',m.swims.toLocaleString()],
+ ['Swimmers',m.swimmers.toLocaleString()],['Clubs',m.clubs],['Events',m.events],
+ ['Name variants',m.variants]].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+/* ---------- Overview ---------- */
+function renderOverview(){
+  const comps = D.competitions.map(c=>`
+    <div class="event-card">
+      <div class="pill">${c.course} · ${c.city||''}</div>
+      <h3 style="margin:8px 0 2px;font-size:15px">${c.name_en}</h3>
+      <div class="rtl muted small" style="margin-bottom:8px">${c.name_he}</div>
+      <div class="muted small">${c.start_date} → ${c.end_date}</div>
+      <div style="display:flex;gap:18px;margin-top:10px">
+        <div><div class="mono" style="font-size:20px;color:var(--cyan)">${c.swims.toLocaleString()}</div><div class="l muted small">swims</div></div>
+        <div><div class="mono" style="font-size:20px">${c.swimmers}</div><div class="l muted small">swimmers</div></div>
+        <div><div class="mono" style="font-size:20px">${c.events}</div><div class="l muted small">events</div></div>
+      </div>
+    </div>`).join('');
+  $('#overview').innerHTML=`
+    <div class="callout"><b>Two real championships, one database.</b> Both were published only as PDF by the
+    Israeli Swimming Association (via loglig.com). A geometry-based parser turns them into a normalised
+    (BCNF) relational schema — the same model my product <b>SwimEdge</b> uses.</div>
+    <div class="grid2">
+      <div class="card"><h2>Competitions ingested</h2><div class="sub">Downloaded from public loglig export URLs, parsed by the pipeline</div>
+        <div class="grid" style="display:grid;gap:12px">${comps}</div></div>
+      <div class="card"><h2>Medals by club</h2><div class="sub">Top clubs across both meets</div>
+        <canvas id="clubChart" height="260"></canvas></div>
+    </div>`;
+  // chart: top clubs by total gold
+  const agg={};
+  D.medals.forEach(r=>{agg[r.club]=(agg[r.club]||0)+r.gold;});
+  const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  new Chart($('#clubChart'),{type:'bar',data:{labels:top.map(t=>t[0]),
+    datasets:[{label:'Gold medals',data:top.map(t=>t[1]),backgroundColor:'oklch(0.82 0.15 90 / .8)',borderRadius:6}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#9fb0c0'},grid:{color:'#2a3542'}},y:{ticks:{color:'#c9d6e2',font:{size:11}},grid:{display:false}}}}});
+}
+
+/* ---------- Medal table ---------- */
+function renderMedals(){
+  const opts=D.competitions.map(c=>`<option value="${c.id}">${c.name_en}</option>`).join('');
+  $('#medals').innerHTML=`<div class="card"><h2>Medal table</h2>
+    <div class="controls"><select id="medalComp">${opts}</select></div>
+    <div id="medalBody"></div></div>`;
+  const draw=cid=>{
+    cid=+cid;
+    const rows=D.medals.filter(r=>r.comp===cid)
+      .sort((a,b)=>b.gold-a.gold||b.silver-a.silver||b.bronze-a.bronze).slice(0,20);
+    $('#medalBody').innerHTML=`<table><thead><tr><th>#</th><th>Club</th>
+      <th>🥇</th><th>🥈</th><th>🥉</th><th>Swimmers</th></tr></thead><tbody>`+
+      rows.map((r,i)=>`<tr><td class="mono muted">${i+1}</td>
+        <td><b class="${/[֐-׿]/.test(r.club)?'rtl':''}">${r.club}</b></td>
+        <td class="medal g">${r.gold||''}</td><td class="medal s">${r.silver||''}</td>
+        <td class="medal b">${r.bronze||''}</td><td class="mono muted">${r.swimmers}</td></tr>`).join('')+
+      `</tbody></table>`;
+  };
+  $('#medalComp').onchange=e=>draw(e.target.value);
+  draw(D.competitions[0].id);
+}
+
+/* ---------- Events & podiums ---------- */
+function renderEvents(){
+  const strokes=[...new Set(D.events.map(e=>e.stroke))];
+  $('#events').innerHTML=`<div class="card"><h2>Events &amp; podiums</h2>
+    <div class="sub">Official podium computed with a SQL window function (RANK), excluding DSQ/DNS</div>
+    <div class="controls">
+      <select id="evComp"><option value="">Both competitions</option>${D.competitions.map(c=>`<option value="${c.id}">${c.name_en}</option>`).join('')}</select>
+      <select id="evStroke"><option value="">All strokes</option>${strokes.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="evGender"><option value="">All</option><option>Girls</option><option>Boys</option><option>Mixed</option></select>
+    </div><div class="grid3" id="evBody"></div></div>`;
+  const draw=()=>{
+    const cc=$('#evComp').value, cs=$('#evStroke').value, cg=$('#evGender').value;
+    // group podium rows by event
+    const byEv={};
+    D.events.forEach(r=>{
+      if(cc && r.comp!==+cc)return; if(cs&&r.stroke!==cs)return; if(cg&&r.gender!==cg)return;
+      const k=r.comp+'|'+r.distance_m+'|'+r.stroke+'|'+r.gender+'|'+r.age_group;
+      (byEv[k]=byEv[k]||[]).push(r);
+    });
+    const cards=Object.values(byEv).slice(0,60).map(rows=>{
+      const h=rows[0];
+      const pod=rows.sort((a,b)=>a.rk-b.rk).map(r=>`
+        <div class="podium-row"><div class="rank-medal">${medal(r.rk)}</div>
+          ${nameCell(r)}<div style="text-align:right">
+            <div class="time">${r.t}</div>
+            <div class="pclub ${/[֐-׿]/.test(r.club||'')?'rtl':''}">${r.club||''}</div></div></div>`).join('');
+      return `<div class="event-card"><h3>${gsym(h.gender)} ${h.distance_m}m ${h.stroke} · ${h.age_group}
+        <span class="badge">${compShort(h.comp)}</span></h3>${pod}</div>`;
+    }).join('');
+    $('#evBody').innerHTML=cards||'<div class="muted">No events match.</div>';
+  };
+  ['evComp','evStroke','evGender'].forEach(id=>$('#'+id).onchange=draw);
+  draw();
+}
+
+/* ---------- Swimmers ---------- */
+function renderSwimmers(){
+  $('#swimmers').innerHTML=`<div class="card"><h2>Swimmer directory</h2>
+    <div class="sub">${D.swimmers.length.toLocaleString()} swimmers resolved across both meets · click a row for a dossier</div>
+    <div class="controls"><input id="swSearch" placeholder="Search name (English or Hebrew)…"></div>
+    <div id="swBody"></div></div>`;
+  const draw=q=>{
+    q=(q||'').trim().toLowerCase();
+    let list=D.swimmers;
+    if(q) list=list.filter(s=>[s.fe,s.le,s.fh,s.lh].some(x=>x&&x.toLowerCase().includes(q)));
+    list=list.slice().sort((a,b)=>(b.medals-a.medals)||((b.best_fina||0)-(a.best_fina||0))).slice(0,60);
+    $('#swBody').innerHTML=`<table><thead><tr><th>Swimmer</th><th>Born</th><th>Club</th>
+      <th>Events</th><th>Medals</th><th>Best FINA</th></tr></thead><tbody>`+
+      list.map(s=>`<tr style="cursor:pointer" onclick="openDossier(${s.id})">
+        <td>${nameCell(s)}</td><td class="mono muted">${s.yob||'—'}</td>
+        <td class="small ${/[֐-׿]/.test(s.club||'')?'rtl':''}">${s.club||'—'}</td>
+        <td class="mono">${s.events}</td><td class="mono g">${s.medals||''}</td>
+        <td class="fina">${s.best_fina||''}</td></tr>`).join('')+`</tbody></table>`;
+  };
+  $('#swSearch').oninput=e=>draw(e.target.value);
+  draw('');
+}
+window.openDossier=function(id){
+  const s=D.swimmers.find(x=>x.id===id); const swims=D.swims[id]||[];
+  const n=nm(s);
+  $('#dossierInner').innerHTML=`<span class="x" onclick="closeDossier()">×</span>
+    <h2 style="margin:0" class="${n.rtl?'rtl':''}">${n.main}</h2>
+    <div class="rtl muted" style="margin-bottom:2px">${n.sub||''}</div>
+    <div class="muted small">Born ${s.yob||'—'} · <span class="${/[֐-׿]/.test(s.club||'')?'rtl':''}">${s.club||'—'}</span> ·
+      ${s.events} events · ${s.medals||0} medals</div>
+    <table style="margin-top:14px"><thead><tr><th>Event</th><th>Seed</th><th>Result</th><th>Place</th><th>FINA</th></tr></thead><tbody>`+
+    swims.map(w=>`<tr><td>${gsym('')}${w.dist}m ${w.stroke} <span class="badge">${w.age}</span></td>
+      <td class="mono muted">${w.seed||'—'}</td>
+      <td class="${/^\d/.test(w.res||'')?'time':'muted'}">${w.res||'—'}</td>
+      <td class="mono">${w.place||'—'}</td><td class="fina">${w.fina||''}</td></tr>`).join('')+
+    `</tbody></table>`;
+  $('#dossier').classList.add('on');
+};
+window.closeDossier=()=>$('#dossier').classList.remove('on');
+$('#dossier').onclick=e=>{if(e.target.id==='dossier')closeDossier();};
+
+/* ---------- Records ---------- */
+function renderRecords(){
+  $('#records').innerHTML=`<div class="card"><h2>Top swims of the archive</h2>
+    <div class="sub">Ranked by World Aquatics (FINA) points — comparable across events</div>
+    <table><thead><tr><th>#</th><th>Swimmer</th><th>Event</th><th>Time</th><th>FINA</th><th>Meet</th></tr></thead><tbody>`+
+    D.records.map((r,i)=>`<tr><td class="mono muted">${i+1}</td><td>${nameCell(r)}</td>
+      <td>${gsym(r.gender)} ${r.dist}m ${r.stroke} · ${r.age}</td>
+      <td class="time">${r.t}</td><td class="fina">${r.fina}</td>
+      <td class="badge">${compShort(r.comp)}</td></tr>`).join('')+`</tbody></table></div>`;
+}
+
+/* ---------- Data challenge ---------- */
+function renderChallenge(){
+  const rows=D.club_variants.slice(0,18).map(v=>{
+    const spells=v.spellings.split(' | ');
+    return `<div class="resolve">
+      <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap">${spells.map(s=>`<span class="spell ${/[֐-׿]/.test(s)?'rtl':''}">${s}</span>`).join('')}</div>
+      <div class="arrow">→</div>
+      <div class="canon ${/[֐-׿]/.test(v.canonical)?'rtl':''}">${v.canonical}</div></div>`;
+  }).join('');
+  $('#challenge').innerHTML=`
+    <div class="callout"><b>The data-management challenge: bilingual entity resolution.</b>
+    The same club is spelled many ways across meets (four spellings of “Maccabi”), in two languages and two
+    scripts. Keying on the federation code and picking the canonical name by statistical mode collapses
+    <b>${D.meta.variants} spellings → ${D.meta.clubs} clubs</b> — with an auditable trail.</div>
+    <div class="grid3">
+      <div class="card"><h2 style="font-size:15px">Multi-source bridge</h2>
+        <p class="small muted">Hebrew start list + English results share <span class="mono">(event, heat, lane)</span>.
+        Joining on it matched <b>98.3%</b> of rows 1:1 with zero ambiguity, tying each English name to its Hebrew
+        counterpart and federation code — deterministically.</p></div>
+      <div class="card"><h2 style="font-size:15px">Missing &amp; special values</h2>
+        <p class="small muted">A result is a time <b>XOR</b> a status (DNS/DSQ/DNF), enforced by a CHECK.
+        Seed <span class="mono">NT</span> stays NULL (not 0). Clubs with no English name fall back to Hebrew.</p></div>
+      <div class="card"><h2 style="font-size:15px">Cross-meet identity</h2>
+        <p class="small muted">A swimmer in both championships becomes one row (matched on Hebrew name + birth year);
+        clubs are unified across meets. This is what lets the archive grow meet by meet.</p></div>
+    </div>
+    <div class="card"><h2>Club name resolution — live from the database</h2>
+      <div class="sub">Every raw spelling observed, collapsed to its canonical club</div>${rows}</div>`;
+}
+
+/* ---------- tabs ---------- */
+const renderers={overview:renderOverview,medals:renderMedals,events:renderEvents,
+  swimmers:renderSwimmers,records:renderRecords,challenge:renderChallenge};
+const done={};
+function show(t){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===t));
+  if(!done[t]){renderers[t]();done[t]=1;}
+}
+$('#tabs').addEventListener('click',e=>{if(e.target.dataset.t)show(e.target.dataset.t);});
+renderOverview();done.overview=1;
+</script>
+</body>
+</html>

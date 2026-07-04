@@ -1,0 +1,22 @@
+# build artifacts / generated data
+build/
+*.duckdb
+*.duckdb.wal
+data/
+# python
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# generated swimmer-level dataset — rebuild with ./build.sh. Kept out of version
+# control to avoid redistributing individuals' (incl. minors') personal data.
+web/data.js
+web/dashboard.html
+web/swimedge_bundle.json
+docs/sample-query-output.txt
+
+# raw meet PDFs (public ISA data, but identify minors) — place locally to build.
+# The rules-only regulations sample PDF is committed.
+samples/results_*.pdf
+samples/startlist_*.pdf
