@@ -6,23 +6,25 @@ SwimEdge's schema was already designed for exactly this bilingual ISA federation
 data. This document is the deep-scan assessment plus the safe, one-way adapter
 that proves it.
 
+> **Updated 2026-07-24** to reflect SwimEdge results-ingestion landing (geometry
+> results parser + `MeetResultsImportService`). The course repo itself is unchanged.
+
 ## 1. What the deep scan found in SwimEdge
 
-SwimEdge (Spring Boot + PostgreSQL, Flyway V1–V17) already models the ISA domain
-and even ships an ingestion pipeline for it:
+SwimEdge (Spring Boot + PostgreSQL, Flyway migrations) models the ISA domain and
+ships a full ingestion pipeline:
 
 - **`clubs`**: `name`, `name_he`, `name_latin`, **`federation_club_code`** (unique)
-  + a **`club_aliases`** table — i.e. exactly the "federation code = identity +
-  spelling variants" structure this project built as `club` + `club_name_variant`.
-- **`swimmers`**: Hebrew `first_name`/`last_name` **and** `first_name_latin`/
-  `last_name_latin` + `federation_registration_id` — the same bilingual identity
-  the parser derives from the two PDFs.
-- **`results`**: `swim_time_millis` + `entry_time_millis` (same integer-millis
-  choice), and a **`ResultSource.FEDERATION_INGEST`** enum value — a slot built
-  for imported federation data.
-- **`scripts/ingestion/pdf_meet_parser/`**: a mature ISA parser (document
-  classifier, start-list / results / **regulations** parsers, Hebrew + time
-  utils, canonical-XLSX → federation-bundle adapter).
+  + **`club_aliases`** — the same "federation code = identity + spelling variants"
+  structure as `club` + `club_name_variant` here.
+- **`swimmers`**: Hebrew and Latin names + `federation_registration_id`.
+- **`results`**: `swim_time_millis`, `result_status`, `fina_points`, and
+  **`ResultSource.FEDERATION_INGEST`**.
+- **`scripts/ingestion/pdf_meet_parser/`**: geometry parsers for start lists
+  (`ISR_GEOMETRY_START_LIST_V1`) and results (`ISR_GEOMETRY_RESULTS_V1`), plus
+  regulations parsers. The geometry method was **ported from this project**.
+- **`MeetResultsImportService`**: backend service that imports the federation
+  results bundle (`source=FEDERATION_INGEST`, idempotent by external ref).
 
 ## 2. Schema crosswalk
 
@@ -45,8 +47,8 @@ and even ships an ingestion pipeline for it:
 ## 3. The adapter (safe, one-way)
 
 `src/swimedge_adapter.py` **reads** the course DuckDB and **writes**
-`web/swimedge_bundle.json` — the exact shape SwimEdge's `FEDERATION_INGEST` path
-consumes. It never touches the SwimEdge codebase or database. Latest run:
+`web/swimedge_bundle.json` — the shape SwimEdge's import path consumes. It never
+touches the SwimEdge codebase or database. Latest run:
 
 ```
 clubs=72  swimmers=1311  competitions=2  events=340  results=4770
@@ -61,8 +63,8 @@ The ISA site (`isr.org.il/Competitions.ASP`) lists each 2025–26 meet and links
 the public loglig results and start-list PDFs. The **Winter 2025 seniors
 championship** (147 pages) was obtained this way and parsed into the database as
 competition #2. Two format notes learned in practice: young-ages meets export with
-Latin names (my `extract_results.py` layout); the major/seniors meets export fully
-**Hebrew/RTL** (handled by the new `extract_loglig.py`).
+Latin names (`extract_results.py` layout); major/seniors meets export fully
+**Hebrew/RTL** (`extract_loglig.py`).
 
 ## 5. Verdict
 
@@ -70,5 +72,9 @@ Synchronisation is not a stretch — it is the natural conclusion of two systems
 built for the same domain. For the course this is the strongest possible framing:
 *the database I designed from first principles converges on the schema of a
 production system I engineered, and a 60-line adapter maps one to the other with
-zero enum mismatches.* Future work: run the bundle through SwimEdge's real
-`FEDERATION_INGEST` importer end-to-end, and add relay + split-time parsing.
+zero enum mismatches.*
+
+**Post-course (SwimEdge):** the geometry parsers, results canonical model, bundle
+format, and `MeetResultsImportService` now close the loop end-to-end in the
+product repo. The course project remains the reference implementation for the
+data-management story (BCNF, entity resolution, SQL analytics).

@@ -4,6 +4,10 @@ Answers two questions the deep read of SwimEdge settled: **do the project's tabl
 match SwimEdge's?** and **what ships as the course project vs. what is the SwimEdge
 combination?**
 
+> **Updated 2026-07-24** after SwimEdge landed geometry results ingestion
+> (`IndividualResultRow`, `ISR_GEOMETRY_RESULTS_V1`, `MeetResultsImportService`).
+> The course project itself is unchanged and self-contained.
+
 ## A. Do the tables match? (DB level — YES)
 
 The course project's normalised tables line up 1:1 with SwimEdge's DB schema. This
@@ -23,47 +27,45 @@ is not theory — the `swimedge_adapter.py` already emits SwimEdge-shaped rows w
 
 **Conclusion:** the database schemas are compatible; the project can feed SwimEdge.
 
-## B. Does the ingestion pipeline match? (Contract level — PARTIAL)
+## B. Does the ingestion pipeline match? (Contract level — YES, post-SwimEdge work)
 
-SwimEdge's offline parser (`scripts/ingestion/pdf_meet_parser/`) converts a PDF to a
-canonical model, then to a bundle the backend imports. Its canonical row type is
-**entry-shaped** (`IndividualEntryRow` carries `seed_time_millis`) — there is **no
-results row type** (no rank / final time / FINA / status). `ISR_TEXT_RESULTS_V1` is
-registered but points at the start-list parser (a stub).
+When this document was first written, SwimEdge's canonical model was
+**entry-shaped only** (`IndividualEntryRow` — seed times, no rank / final time /
+FINA / status). That gap is **now closed** in the SwimEdge repo (July 2026):
 
-| Data | SwimEdge canonical model | Status |
-|------|--------------------------|--------|
-| Start list / entry times | `IndividualEntryRow` | exists — **compatible** |
+| Data | SwimEdge canonical model | Status (July 2026) |
+|------|--------------------------|--------------------|
+| Start list / entry times | `IndividualEntryRow` | `ISR_GEOMETRY_START_LIST_V1` |
 | Relay entries | `RelayEntryRow` | exists |
-| **Results (place, final time, FINA, status)** | — none — | **GAP** |
+| **Results (place, final time, FINA, status)** | `IndividualResultRow` | `ISR_GEOMETRY_RESULTS_V1` |
+| Bundle + backend import | `canonical_to_meet_results_bundle` | `MeetResultsImportService` |
 
-So the DB `results` table exists and matches, but the *ingestion path* cannot carry
-results yet. Building it is a contract + backend change (see boundary below).
+The geometry row-builder in SwimEdge (`geometry_rowbuilder.py`) was **ported from
+this project's** `extract_startlist.py` / `extract_results.py` / `extract_loglig.py`.
+SwimEdge added completeness gates (`ROW_UNDER_COUNT`), multi-round handling
+(`swim_no`, `round`), and the lane-0 header-bleed fix (`row_v_tolerance=7`).
 
-Separately, the existing entry parser is **fragile**: extraction y-buckets words
-into lines and the parser reads by token *position*, so a wrapped club name or a
-blank cell misaligns columns — exactly the Arena defect. The fix is the geometry
-method; it does **not** require any schema change.
+**For the course project:** the parsers here remain the authoritative, self-contained
+implementation. SwimEdge is the downstream product — not a dependency for grading.
 
 ## C. The scope boundary (what goes where)
 
 ### 1. Final course project — ships as-is, self-contained
-Everything in this repository: the two-source geometry parsers,
+Everything in **this repository** (`swimdata-il`): the two-source geometry parsers,
 BCNF schema, entity resolution, 4,770-swim two-competition database, the dashboard,
 the SwimEdge adapter (as a *demonstration* of interoperability), and all docs. It
 depends on **nothing** in SwimEdge and is graded on its own. The SwimEdge link is a
 bonus narrative, not a dependency.
 
-### 2. SwimEdge combination — in-bounds now (tooling only, no schema/backend)
-Port the proven geometry method into SwimEdge's parser for the **existing** entry
-contract: a word-level extractor + geometry row-builder + a completeness gate, with
-golden-fixture tests. This fixes the merged-rows / misaligned-columns bug for start
-lists / entry times without touching the schema, the backend, or the bundle format.
+### 2. SwimEdge combination — done (product repo, not course deliverable)
+- Geometry start-list parser + completeness gate (tooling).
+- Geometry results parser + `IndividualResultRow` + bundle + backend import service.
+- Lives in `newswimedge/scripts/ingestion/pdf_meet_parser/` and
+  `com.swimedge.domain.imports.MeetResultsImportService`.
 
-### 3. Future — larger change, out of scope here (crosses into backend/contract)
-End-to-end **results ingestion** so a platform could archive *past competitions*: a
-new `IndividualResultRow` canonical model + results sheet + bundle section + a backend
-results-import service writing to the existing `results` table. It spans tooling
-**and** backend and is a fundamental change → **out of scope for this course project.**
+### 3. Not duplicated in the course repo (by design)
+End-to-end SwimEdge import (Flyway migrations, Spring services, portal UI) is
+product work. The course proves the **data model and transform**; SwimEdge proves
+**production ingestion**.
 
 See [`swimedge-sync.md`](swimedge-sync.md) for the schema crosswalk.

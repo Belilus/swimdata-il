@@ -1,7 +1,7 @@
 # SwimData-IL — Integrating Israeli Swimming Association Results into a Relational Database
 
 **Data Management, BGU — Spring 2026 · Final Project Report**
-Asaf Belilus · [GitHub repository link] · Due 2026-07-20
+Asaf Belilus · https://github.com/Belilus/swimdata-il · Due 2026-07-20
 
 > Target length ≤ 5 pages. Figures/numbers below are produced by the actual
 > pipeline in this repository against one real ISA championship.
@@ -154,4 +154,9 @@ Relay events and split times are out of scope for this meet (none present) but t
 schema accommodates them. A handful of long names split at a column seam
 (`ALEXSAND ER`) — a residual OCR-band artifact. Scaling to many competitions
 (cross-meet swimmer identity, true personal-best history over time) is the natural
-extension — and the same normalised model could feed the SwimEdge product.
+extension — and the same normalised model feeds the SwimEdge product: the geometry
+parsers were ported into SwimEdge's ingestion tooling, and a one-way adapter
+(`swimedge_adapter.py`) maps this database onto SwimEdge's import bundle with
+zero enum mismatches. Full results ingestion (canonical model + backend service)
+was implemented in SwimEdge after the course project shipped; it is documented in
+`docs/swimedge-sync.md` but is not a dependency for this submission.

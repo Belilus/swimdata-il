@@ -7,8 +7,8 @@ The swimmer-level dataset and dashboard are generated locally (not committed —
 *Data & privacy* in the README). Place the meet PDFs in `samples/` and run:
 
 ```bash
-python3 -m pip install pdfplumber duckdb pandas
-./build.sh          # → web/dashboard.html
+python3 -m pip install -r requirements.txt
+bash build.sh          # → web/dashboard.html
 ```
 
 Open **`web/dashboard.html`**. Then:
@@ -26,7 +26,7 @@ Read **`report/report.md`** (≤5 pages): application overview, data sources, th
 data-management challenge, database design, and representative SQL.
 
 ## 3. What the build produced (verification)
-`./build.sh` parses the meet PDFs in `samples/`, builds the normalised DB, prints the
+`bash build.sh` parses the meet PDFs in `samples/`, builds the normalised DB, prints the
 verification (row counts + **0 orphan foreign keys**), and regenerates the exports and
 dashboard.
 

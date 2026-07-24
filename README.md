@@ -5,12 +5,13 @@ normalised relational database — with real entity resolution, meaningful SQL, 
 an interactive dashboard.**
 
 > Final project — **Data Management, Ben-Gurion University (Spring 2026)**, Yuval
-> Moskovitch. Student: **Asaf Belilus**. Weight: 40%.
+> Moskovitch. Student: **Asaf Belilus**. Weight: 40%.  
+> **Repository:** https://github.com/Belilus/swimdata-il · [`SUBMISSION.md`](SUBMISSION.md)
 
 ---
 
 ## See it in one command
-Run `./build.sh` (deps: `pdfplumber duckdb pandas`) to build **`web/dashboard.html`**
+Run `bash build.sh` (deps: `pip install -r requirements.txt`) to build **`web/dashboard.html`**
 from the source PDFs, then open it in any browser — a single self-contained file:
 medal tables, event podiums, searchable bilingual swimmer dossiers, a records board,
 and a live "data challenge" panel, all from the real data below. The generated
@@ -43,9 +44,9 @@ the dashboard and `docs/schema-design.md`.
 
 ## Reproduce it (one command)
 ```bash
-python3 -m pip install pdfplumber duckdb pandas
-./build.sh                 # parse both meets → normalised DB → dashboard + exports
-python3 src/app.py         # optional: interactive console query app
+python3 -m pip install -r requirements.txt
+bash build.sh                # parse both meets → normalised DB → dashboard + exports
+python3 src/app.py           # optional: interactive console query app
 ```
 Canonical SQL targets **PostgreSQL** (`sql/01_schema.sql`); the runner executes the
 identical SQL on an embedded **DuckDB** so it reproduces with zero server setup.
@@ -53,6 +54,7 @@ identical SQL on an embedded **DuckDB** so it reproduces with zero server setup.
 ## Where to look
 ```
 report/report.md            the ≤5-page report  ← start here
+SUBMISSION.md               submission guide + repo link for the evaluator
 web/index.html              the dashboard UI (data.js + dashboard.html are generated)
 DEMO.md                     2-minute guided walkthrough for the evaluation
 docs/

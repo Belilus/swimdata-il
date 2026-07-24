@@ -24,6 +24,7 @@ fi
 echo "== exports =="
 python3 src/export_web.py       --db "$DB" --out web/data.js
 python3 src/swimedge_adapter.py --db "$DB" --out web/swimedge_bundle.json
+python3 src/export_sample_queries.py --db "$DB"
 # single-file dashboard (data inlined) for easy sharing
 python3 - <<'PY'
 html=open("web/index.html",encoding="utf-8").read()
