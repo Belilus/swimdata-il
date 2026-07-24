@@ -2,8 +2,7 @@
 
 **סטודנט:** Asaf Belilus  
 **קורס:** ניהול נתונים, אוניברסיטת בן-גוריון, אביב 2026  
-**מרצה:** Yuval Moskovitch  
-**משקל:** 40%
+**מרצה:** Yuval Moskovitch
 
 ## קישור לריפו
 
@@ -12,11 +11,26 @@
 > הריפו פרטי (`private`). לצורך בדיקה — הוסיפו את המרצה/בודק כ-collaborator,
 > או הפכו ל-public לפני ההגשה.
 
-## מה מוגש
+## מה להעלות ב-Moodle (Add submission)
+
+**קובץ אחד:** [`report/report.pdf`](report/report.pdf)
+
+זה הדוח הסופי (עד 5 עמודים) הכולל את כל הסעיפים הנדרשים:
+Application overview · Data sources · Data management challenges · Database design · Representative SQL queries.
+
+ליצירה מחדש:
+```bash
+python3 -m pip install fpdf2   # פעם אחת
+python3 report/build_pdf.py  # → report/report.pdf
+```
+
+**לא** מעלים את הריפו GitHub בטופס זה — הקישור מופיע בתוך הדוח (§6). ודא שהריפו נגיש למרצה.
+
+## מה מוגש (סה"כ)
 
 | פריט | מיקום |
 |------|--------|
-| דוח (≤5 עמודים) | [`report/report.md`](report/report.md) |
+| דוח (≤5 עמודים) | `report/report.pdf` ← **להעלאה ב-Moodle** |
 | הצעת פרויקט | [`proposal/proposal.md`](proposal/proposal.md) |
 | סכימת DB + SQL | [`sql/`](sql/) |
 | קוד ETL + אפליקציה | [`src/`](src/) |

@@ -5,7 +5,7 @@ normalised relational database — with real entity resolution, meaningful SQL, 
 an interactive dashboard.**
 
 > Final project — **Data Management, Ben-Gurion University (Spring 2026)**, Yuval
-> Moskovitch. Student: **Asaf Belilus**. Weight: 40%.  
+> Moskovitch. Student: **Asaf Belilus**.  
 > **Repository:** https://github.com/Belilus/swimdata-il · [`SUBMISSION.md`](SUBMISSION.md)
 
 ---

@@ -1,7 +1,7 @@
 # SwimData-IL — Integrating Israeli Swimming Association Results into a Relational Database
 
 **Data Management, BGU — Spring 2026 · Final Project Report**
-Asaf Belilus · https://github.com/Belilus/swimdata-il · Due 2026-07-20
+Asaf Belilus · https://github.com/Belilus/swimdata-il · Due 2026-07-27
 
 > Target length ≤ 5 pages. Figures/numbers below are produced by the actual
 > pipeline in this repository against one real ISA championship.
@@ -116,21 +116,41 @@ query workload (see §5).
 ## 5. Representative SQL queries
 
 The full set is in `sql/04_queries.sql`; each is tagged with the course concept it
-exercises. Highlights:
+exercises. Two examples:
 
-- **Podium per event** — `RANK() OVER (PARTITION BY event ORDER BY time)`, filtering
-  `final_time_ms IS NOT NULL` so a DSQ cannot take a medal (*window functions*,
-  *3-valued logic*).
-- **Seed → final improvement** — arithmetic across the two integrated sources with
-  correct `NULL` handling for `NT` entries. Top drop: **48.84 s** (YOSEF ROUD, 800 Free).
-- **Club standings** — multi-table join + `COUNT(… ) FILTER (WHERE place=1)` conditional
-  aggregation, `GROUP BY`, `ORDER BY` (*aggregation*).
-- **`GROUP BY … HAVING`** — clubs fielding ≥ 10 swimmers (post-aggregate filter).
-- **Entity-resolution audit** — clubs ranked by number of spelling variants
-  (`STRING_AGG`), turning the data-quality work into a query.
-- **Disqualification analysis** — `GROUP BY dsq_rule`; `SW 4.4` (false start) is the most
-  common, 10×.
-- **`INTERSECT`** — swimmers who raced both Freestyle and Butterfly (*set operators*).
+**Q1 — Podium per event** (window functions, three-valued logic):
+
+```sql
+SELECT distance_m, stroke, gender, age_group, podium,
+       first_name_en, last_name_en, club, final_time
+FROM (
+  SELECT f.*, RANK() OVER (PARTITION BY event_id ORDER BY final_time_ms) AS podium
+  FROM v_fmt f
+  WHERE final_time_ms IS NOT NULL   -- DSQ/DNS must not take a medal
+) t
+WHERE podium <= 3;
+```
+
+**Q3 — Club standings** (join + conditional aggregation):
+
+```sql
+SELECT COALESCE(c.name_en, c.name_he) AS club,
+       COUNT(*) FILTER (WHERE r.place = 1) AS gold,
+       COUNT(*) FILTER (WHERE r.place = 2) AS silver,
+       COUNT(*) FILTER (WHERE r.place = 3) AS bronze,
+       COUNT(DISTINCT en.swimmer_id) AS swimmers
+FROM result r
+JOIN entry en ON en.entry_id = r.entry_id
+JOIN swimmer sw ON sw.swimmer_id = en.swimmer_id
+JOIN club c ON c.club_id = sw.club_id
+GROUP BY 1 ORDER BY gold DESC;
+```
+
+Further queries in the repository: seed→final improvement (NULL-safe arithmetic on
+integrated columns; top drop **48.84 s**), `GROUP BY … HAVING` (clubs with ≥ 10
+swimmers), entity-resolution audit (`STRING_AGG` over `club_name_variant`),
+disqualification analysis (`GROUP BY dsq_rule`; `SW 4.4` most common, 10×), and
+`INTERSECT` (swimmers in both Freestyle and Butterfly).
 
 **Indexing & plans (`sql/05_indexes_explain.sql`).** Ties to the *Server* lectures:
 a composite B+-tree `swimmer(last_name, first_name, birth_year)` serves prefix name
@@ -140,23 +160,10 @@ optimiser can pick **index-nested-loop** over block-nested-loop on the
 `result→entry→heat→event→swimmer` star join. `EXPLAIN`/`EXPLAIN ANALYZE` before and
 after `DROP INDEX` demonstrate the plan and cost change.
 
-## 6. Reproducibility
+## 6. Repository and reproducibility
 
-`python3 src/run_pipeline.py` runs the whole chain — PDF → CSV → staging → normalised
-core → verification — into an embedded database with zero server setup. The canonical
-schema (`sql/01_schema.sql`) and transformation (`sql/03_transform.sql`) are written for
-**PostgreSQL**; the runner executes the identical SQL on DuckDB for a one-command demo.
-Verification asserts row counts and **zero orphan foreign keys**.
+**GitHub:** https://github.com/Belilus/swimdata-il (source code, schema, SQL, parsers).
 
-## 7. Limitations & future work
-
-Relay events and split times are out of scope for this meet (none present) but the
-schema accommodates them. A handful of long names split at a column seam
-(`ALEXSAND ER`) — a residual OCR-band artifact. Scaling to many competitions
-(cross-meet swimmer identity, true personal-best history over time) is the natural
-extension — and the same normalised model feeds the SwimEdge product: the geometry
-parsers were ported into SwimEdge's ingestion tooling, and a one-way adapter
-(`swimedge_adapter.py`) maps this database onto SwimEdge's import bundle with
-zero enum mismatches. Full results ingestion (canonical model + backend service)
-was implemented in SwimEdge after the course project shipped; it is documented in
-`docs/swimedge-sync.md` but is not a dependency for this submission.
+`bash build.sh` runs PDF → CSV → staging → normalised core → verification on DuckDB
+(zero server setup); the canonical DDL targets PostgreSQL. Verification asserts row
+counts and **zero orphan foreign keys**.
