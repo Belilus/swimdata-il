@@ -52,7 +52,8 @@ def main():
         sys.exit(f"database not found: {args.db}\n-> run: bash build.sh")
 
     sql = open(QUERIES, encoding="utf-8").read()
-    con = duckdb.connect(args.db, read_only=True)
+    # Views (v_swim, v_fmt) must be created before SELECTs — needs write, not read_only.
+    con = duckdb.connect(args.db)
     lines = []
 
     for title, block in split_blocks(sql):
