@@ -6,7 +6,8 @@ an interactive dashboard.**
 
 > Final project — **Data Management, Ben-Gurion University (Spring 2026)**, Yuval
 > Moskovitch. Student: **Asaf Belilus**.  
-> **Repository:** https://github.com/Belilus/swimdata-il · [`SUBMISSION.md`](SUBMISSION.md)
+> **Repository:** https://github.com/Belilus/swimdata-il · [`SUBMISSION.md`](SUBMISSION.md)  
+> **Showcase:** https://belilus.github.io/swimdata-il/ (screenshots + metrics — full interactive dashboard via local `build.sh`)
 
 ---
 
@@ -89,3 +90,13 @@ PDFs and every generated swimmer-level artifact are **kept out of version contro
 
 Everything regenerates locally: place the public meet PDFs in `samples/` and run
 `./build.sh` to rebuild the database, exports, and dashboard.
+
+## Screenshots
+
+Static showcase (no PII committed): **[belilus.github.io/swimdata-il](https://belilus.github.io/swimdata-il/)**
+
+| | |
+|---|---|
+| Dashboard | `docs/screenshots/dashboard-hero.png` |
+| Records board | `docs/screenshots/records.png` |
+| Data challenge panel | `docs/screenshots/challenge.png` |
