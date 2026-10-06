@@ -1,10 +1,12 @@
 # SwimData-IL — Integrating Israeli Swimming Association Results into a Relational Database
 
+**Hebrew version:** [`report.he.md`](report.he.md) · PDF: [`report.he.pdf`](report.he.pdf)
+
 **Data Management, BGU — Spring 2026 · Final Project Report**
 Asaf Belilus · https://github.com/Belilus/swimdata-il · Due 2026-07-27
 
 > Target length ≤ 5 pages. Figures/numbers below are produced by the actual
-> pipeline in this repository against one real ISA championship.
+> pipeline in this repository against the real ISA championships in this repo.
 
 ---
 
@@ -35,7 +37,7 @@ links to the timing provider **loglig.com**. Each competition exposes three PDFs
 |--------|----------|---------------------|
 | **Results** | English | rank, heat, lane, swimmer, birth year, club, final time, FINA points, status (DNS/DQ/…) |
 | **Start list** | Hebrew (RTL) | lane assignment, **numeric club code**, **seed time** (or `NT`), Hebrew swimmer & club names |
-| **Regulations** (*תקנון*) | Hebrew | eligibility, age groups, entry limits — used to validate constraints (e.g. ≤ 4 events/swimmer, which the data confirms: max = 4) |
+| **Regulations** (rulebook) | Hebrew | eligibility, age groups, entry limits — used to validate constraints (e.g. ≤ 4 events/swimmer, which the data confirms: max = 4) |
 
 The PDFs are **fixed-column reports with no data layer**: naive text extraction
 (`pdftotext`) scrambles the columns because of RTL Hebrew headers, repeated page
@@ -57,7 +59,12 @@ tuple **(event-signature, heat, lane)**, and the start list carries a **language
 numeric club code**. Joining on `(distance, stroke, gender, age, heat, lane)` matches
 **1,672 / 1,701 rows (98.3 %) one-to-one with zero ambiguity**, and through that bridge
 each English name/club is tied to its Hebrew counterpart and to the federation code —
-deterministically, not by fuzzy transliteration.
+deterministically, not by fuzzy transliteration. The remaining **29 rows (1.7 %) are
+kept**: a `LEFT JOIN` from results to the start list. Results are the fact; the start
+list only enriches. Unmatched rows (scratch / lane change) keep `NULL` club code,
+Hebrew name and seed time — honest missingness, not a guessed name match. A
+`RIGHT JOIN` would keep start-list-only people with no official result; the load
+grain is a result row, so the join stays left.
 
 **(b) Club de-duplication / canonicalisation.** The same club is spelled many ways in
 the results: the "Maccabi" prefix alone appears as *Macabbi / Maccabi / Maccabbi /

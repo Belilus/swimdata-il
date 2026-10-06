@@ -1,5 +1,7 @@
 # Course-concept map — where every topic shows up in the project
 
+**Hebrew:** [`course-concept-map.he.md`](course-concept-map.he.md)
+
 This is the "I learned the course" cheat-sheet for the evaluation meeting. For each
 unit taught this semester (per `study/LESSON_INDEX.md`), it points to the exact place
 in the project that demonstrates it. Bring this to the demo.
@@ -33,4 +35,12 @@ leaked-status data defect.
 - *"What's your data-management challenge?"* → §3 above; run `app.py variants`.
 - *"How do indexes help here?"* → `EXPLAIN` in `05`, tie to Server1–5.
 - *"How did you handle missing/dirty data?"* → `NT`, DSQ normalisation, `COALESCE` for
-  the 6 English-less clubs, the `DNF`-leak self-heal.
+  the 6 English-less clubs, the `DNF`-leak self-heal, and the 29 unmatched bridge rows.
+- *"What about the 1.7% that did not match? Why LEFT JOIN, not RIGHT?"* → **Those 29
+  rows are kept.** The bridge is a `LEFT JOIN` from results to the start list
+  (`sql/03_transform.sql`). Results are the fact: an official swim exists. The start
+  list only enriches (club code, Hebrew, seed time). The 29 have no deterministic
+  match (scratch / lane change) so `club_code`, Hebrew name and seed stay `NULL` —
+  no fuzzy name matching. **RIGHT JOIN is not used:** it would keep start-list-only
+  people with no results row. The load grain is a result row, and every `swim` row
+  creates both `entry` and `result`. Stay with `LEFT JOIN`.

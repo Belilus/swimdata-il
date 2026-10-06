@@ -1,5 +1,7 @@
 # Project proposal — SwimData-IL
 
+**Hebrew:** [`proposal.he.md`](proposal.he.md)
+
 **Student:** Asaf Belilus · **Course:** Data Management, BGU Spring 2026
 
 ## Topic

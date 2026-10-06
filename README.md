@@ -1,5 +1,7 @@
 # SwimData-IL
 
+**עברית:** [`README.he.md`](README.he.md) · דוח: [`report/report.he.md`](report/report.he.md) · הצעה: [`proposal/proposal.he.md`](proposal/proposal.he.md)
+
 **Turning the Israeli Swimming Association's PDF-only competition results into a
 normalised relational database — with real entity resolution, meaningful SQL, and
 an interactive dashboard.**
@@ -54,7 +56,14 @@ identical SQL on an embedded **DuckDB** so it reproduces with zero server setup.
 
 ## Where to look
 ```
-report/report.md            the ≤5-page report  ← start here
+README.he.md                Hebrew README
+report/report.md            the ≤5-page report (English)  ← graded
+report/report.he.md         same report in Hebrew
+report/report.pdf           formatted English PDF
+report/report.he.pdf        formatted Hebrew PDF
+proposal/proposal.he.md     Hebrew proposal
+sql/README.he.md            deep Hebrew guide to every SQL file and table
+src/README.he.md            deep Hebrew guide to every Python file
 SUBMISSION.md               submission guide + repo link for the evaluator
 web/index.html              the dashboard UI (data.js + dashboard.html are generated)
 DEMO.md                     2-minute guided walkthrough for the evaluation

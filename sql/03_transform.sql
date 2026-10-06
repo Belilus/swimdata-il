@@ -22,6 +22,8 @@ VALUES (1,
 -- ---------- swim bridge: integrate the two sources ----------------------
 --  LEFT JOIN so results with no matching start-list entry (scratches /
 --  lane changes) survive with a NULL club_code = an honest missing value.
+--  Not a RIGHT/FULL join: the start list only enriches official result rows.
+--  Start-list-only people (seeded, never printed on results) are out of scope.
 CREATE TEMP TABLE swim AS
 SELECT
     CAST(NULLIF(TRIM(r.event_no),'')   AS INTEGER)        AS event_no,
@@ -57,6 +59,8 @@ LEFT JOIN stg_startlist s
 --  canonical name = the most frequently observed spelling (statistical
 --  mode via a window rank). This auto-heals casing + spelling variants and
 --  demotes the 1-off corrupted spelling.
+-- WITH is for creating temporary tables to avoid nested subqueries
+-- en_pick and he_pick are using en and he 
 INSERT INTO club (club_id, federation_code, name_en, name_he)
 WITH en AS (
     SELECT club_code, club_en_raw AS nm, COUNT(*) c

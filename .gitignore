@@ -20,3 +20,22 @@ docs/sample-query-output.txt
 # The rules-only regulations sample PDF is committed.
 samples/results_*.pdf
 samples/startlist_*.pdf
+
+# Local presentation deck (11 MB, binary) — kept out of the public repo.
+SwimData-IL_Data_Blueprint.pptx
+
+# ---------------------------------------------------------------------------
+# Cursor (workspace standard, Belilus/asaf-workspace): commit shared config only
+# (rules/*.mdc, cli.json, hooks, commands, skills, environment.json). Logs,
+# caches, chat exports, plans and mcp.json stay local; durable plans and
+# handoffs belong in docs/.
+# ---------------------------------------------------------------------------
+.cursor/*
+!.cursor/rules/
+!.cursor/cli.json
+!.cursor/hooks.json
+!.cursor/hooks/
+!.cursor/commands/
+!.cursor/skills/
+!.cursor/environment.json
+.cursor/**/*.log

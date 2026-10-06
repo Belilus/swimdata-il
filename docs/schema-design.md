@@ -1,5 +1,7 @@
 # Schema design & rationale
 
+**Hebrew:** [`schema-design.he.md`](schema-design.he.md)
+
 Canonical DDL: [`sql/01_schema.sql`](../sql/01_schema.sql). Target DBMS: **PostgreSQL**
 (verified end-to-end on DuckDB via `run_pipeline.py`).
 
@@ -79,3 +81,6 @@ is exact; human `mm:ss.hh` formatting happens only in the presentation view `v_f
    and reversible, not a black box — you can show exactly which spellings mapped where.
 4. **Staging tables are all `TEXT`.** Dirty values (`NT`, `DQ / SW 4.4`, wrapped club
    names) land without failing; cleaning/typing happens in `03_transform.sql`.
+5. **The source bridge is a `LEFT JOIN`, not a `RIGHT JOIN`.** Results are the official
+   fact; the start list enriches. The 29 unmatched rows are kept with `NULL`s. A right
+   join would ingest start-list-only people with no results row — outside the load grain.

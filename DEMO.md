@@ -38,6 +38,7 @@ dashboard.
 | "What's the data-management challenge?" | `report/report.md` §3 + the dashboard panel |
 | "How do indexes help?" | `sql/05_indexes_explain.sql` (EXPLAIN) |
 | "How did you handle dirty/missing data?" | NT→NULL, DQ→DSQ, casing, the `DNF`-leak self-heal — `docs/schema-design.md` |
+| "What about the 1.7% / why LEFT JOIN not RIGHT?" | 29 rows kept with NULL club_code; results are the fact, start list only enriches. No RIGHT JOIN — `docs/course-concept-map.md` |
 | "Every course topic?" | `docs/course-concept-map.md` |
 
 ## 5. Real-world hook
